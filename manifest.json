@@ -1,0 +1,12 @@
+{
+  "name": "Dashboard Presenter",
+  "version": "1.0",
+  "description": "Show unlimited number of URLs in one tab with specified interval :)",
+  "permissions": ["activeTab", "storage"],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "options_page": "options.html",
+  "manifest_version": 2
+}
