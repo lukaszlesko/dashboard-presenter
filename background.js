@@ -1,9 +1,13 @@
 'use strict';
 
 chrome.runtime.onInstalled.addListener(function() {
-  let currentIndex = -1;
+  chrome.storage.sync.set({refreshInterval: 15000});
+  chrome.storage.sync.set({reloadEnabled: 0});
 
-  function magic() {
+  let currentIndex = -1;
+  let mainThreadInterval;
+
+  function magic(tabIndex) {
     chrome.storage.sync.get(['urls'], function(result) {
         let urls = result.urls.split("\n");
         if (!urls.length) {
@@ -15,18 +19,35 @@ chrome.runtime.onInstalled.addListener(function() {
         currentIndex = currentIndex % urls.length;
 
         // load it
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.query({index: tabIndex}, function(tabs) {
           chrome.tabs.update(tabs[0].id, {url: urls[currentIndex]});
         });
     });
   }
 
-  setInterval(() => {
-    chrome.storage.sync.get(['reloadEnabled'], function(result) {
-      if (result.reloadEnabled) {
-        magic();
-      }
-    });
+  chrome.storage.onChanged.addListener(function(changes, areaName) {
+    chrome.storage.sync.get(['reloadEnabled', 'refreshInterval'], function(result) {
+        let reloadEnabled = parseInt(result.reloadEnabled);
+        let refreshInterval = parseInt(result.refreshInterval);
 
-  }, 15000);
+        if ("reloadEnabled" in changes) {
+            reloadEnabled = parseInt(changes["reloadEnabled"]["newValue"]);
+        }
+        if ("refreshInterval" in changes) {
+            refreshInterval = parseInt(changes["refreshInterval"]["newValue"]);
+        }
+
+        // clear old interval if running
+        if (mainThreadInterval) {
+            clearInterval(mainThreadInterval);
+        }
+
+        // run new if needed
+        if (reloadEnabled && refreshInterval) {
+            mainThreadInterval = setInterval(() => {
+              magic(reloadEnabled);
+            }, refreshInterval);
+        }
+    });
+  });
 });
