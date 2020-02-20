@@ -8,5 +8,10 @@
     "persistent": false
   },
   "options_page": "options.html",
-  "manifest_version": 2
+  "manifest_version": 2,
+  "applications": {
+    "gecko": {
+      "id": "dp@luksazlesko.com"
+    }
+  }
 }

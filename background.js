@@ -1,5 +1,21 @@
 'use strict';
 
+let currentIndex = -1;
+const urls = ["https://mobilevikings.pl", "https://mobilevikings.com"]
+
+function callNext() {
+    currentIndex += 1;
+    currentIndex = currentIndex % urls.length;
+
+    setTimeout(function() {
+        let updating = browser.tabs.update({url: urls[currentIndex]});
+        updating.then(callNext);
+    }, 5000);
+}
+
+callNext();
+
+/*
 chrome.runtime.onInstalled.addListener(function() {
   chrome.storage.sync.set({refreshInterval: 15000});
   chrome.storage.sync.set({reloadEnabled: 0});
@@ -51,3 +67,4 @@ chrome.runtime.onInstalled.addListener(function() {
     });
   });
 });
+*/
